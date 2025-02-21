@@ -1,0 +1,153 @@
+import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { Meta } from "@/components/mdx/meta";
+
+export const metadata = {
+  title: "Accessible Smooth Scrolling",
+  description:
+    "Using Lenis Smooth Scroll to create accessible smooth scrolling",
+  date: "2025-01-09",
+  author: "Fabrice",
+  tags: ["Lenis", "Scrolling", "Next.js", "Accessible"],
+};
+
+<Meta {...metadata} className="mb-8" />
+
+Whether you like it or not, smooth scrolling is something you can find on almost every Awwward-winning website. There are various methods to accomplish this task. One such way is by using tools like GSAP or Locomotive Scroll. My preferred way is with Studio Lenis' Smooth scroll package. Many libraries tend to interfere with the user's natural scrolling behavior. However, Lenis' library doesn't interfere with the user's native scroll. Instead, it applies a smooth or gradual transition to the native scroll while providing the correct scroll position to any software or code that requires it.
+
+<br />
+For this tutorial, we will be using the Next.JS framework. Next.js simplifies building
+React websites. It helps them load faster for visitors, which improves user experience.
+It also benefits search engines, making your site more discoverable. Overall, Next.js
+saves you time coding and gets your website running smoothly.
+
+## Setting up the project
+
+Let's start by creating a new Next.js project. You can do this by running the following command in your terminal:
+
+```bash
+bun create-next-app
+```
+
+> This automatically installs dependencies using npm. You can use the following link as a reference: [https://bun.sh/guides/ecosystem/nextjs](https://bun.sh/guides/ecosystem/nextjs).
+
+## Adding Lenis to your project
+
+To install the package, run the following command:
+
+```bash
+bun add @studio-freight/lenis
+```
+
+```jsx
+const lenis = new Lenis();
+
+lenis.on("scroll", (e) => {
+  console.log(e);
+});
+
+function raf(time) {
+  lenis.raf(time);
+  requestAnimationFrame(raf);
+}
+
+requestAnimationFrame(raf);
+```
+
+We will need to add some syntax. Import the following at the top of your file:
+
+```bash
+import Lenis from '@studio-freight/lenis'
+```
+
+For our code to work as intended, we want to place the logic inside the `useLayoutEffect` hook. This hook is called before the user can see any changes in the render, while the `useEffect` hook gets called after the user can see the changes. The goal is to execute the code inside the effect immediately before the browser paints the DOM; to ensure the user experiences smooth scrolling from the start. That's why we choose to use the `useLayoutEffect` hook. Since we want the logic to pass to the whole site, we want to add a `children` property with a `ReactNode` as its typing. The final result should look something like this:
+
+```jsx
+"use client";
+import { useLayoutEffect, useRef } from "react";
+import Lenis from "@studio-freight/lenis";
+
+interface SmoothScrollProps {
+  children: React.ReactNode;
+}
+
+const SmoothScrollWrapper: React.FC<SmoothScrollProps> = ({ children }) => {
+  const lenisRef = (useRef < Lenis) | (null > null);
+
+  useLayoutEffect(() => {
+    lenisRef.current = new Lenis();
+
+    function raf(time: number) {
+      if (lenisRef.current) {
+        lenisRef.current.raf(time);
+      }
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+  }, []);
+
+  return <>{children}</>;
+};
+
+export default SmoothScrollWrapper;
+```
+
+Also, do not forget to put `'use client'` at the top of your file. Next.js will throw an error otherwise because we use the UseRef hook.
+
+## Finishing touches
+
+While not mandatory, I recommend adding the following styling properties to your global.css file. These changes optimize native browser functions to enhance performance and efficiency, ensuring smoother operation in various scenarios.
+
+```css
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+```
+
+When the component is created you can use it in your layout file as follows:
+
+```jsx
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode,
+}>) {
+  return (
+    <html lang="en">
+      <SmoothScrollWrapper>
+        <body className={inter.className}>{children}</body>
+      </SmoothScrollWrapper>
+    </html>
+  );
+}
+```
+
+<br />
+Well, look at that, already Awwwards ready! If you have any questions, feel free
+to contact me. Or take a look at the [source code for this project](https://github.com/fabricewerger/blog-source/tree/main/smooth-scroll)!
+
+[Darkroom Engineering](https://lenis.darkroom.engineering/) created Lenis.
+
+---
+
+Cheers,
+
+<br />
+Fabrice
